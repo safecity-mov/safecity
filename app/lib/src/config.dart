@@ -13,13 +13,13 @@ class AppConfig {
   /// dépendance de plus pour une chaîne de six caractères, dans un projet qui
   /// doit justifier chaque paquet devant F-Droid (§12.6). `config_test.dart`
   /// casse si les deux divergent.
-  static const String version = '0.7.1';
+  static const String version = '0.7.2';
 
   /// Le `versionCode` du même `pubspec.yaml`, après le `+`. Le seul nombre
   /// qu'Android compare pour décider qu'il y a une mise à jour, donc celui que
   /// l'app compare à ce que le serveur annonce (`UpdateChecker`). Recopié pour
   /// la même raison que `version`, et vérifié par le même test.
-  static const int versionCode = 25;
+  static const int versionCode = 26;
 
   /// Par défaut, l'instance de développement, jointe par `adb reverse
   /// tcp:8080 tcp:8080`. Cela vaut pour l'émulateur comme pour un téléphone
