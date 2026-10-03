@@ -66,6 +66,29 @@ void main() {
       expect(draft!.description, 'Trou profond');
     });
 
+    testWidgets('n\'offre pas de précision quand la console l\'a coupée', (tester) async {
+      // §4.3 amendé (0240) : le réglage vient du serveur, le champ suit.
+      ReportDraft? draft;
+      await tester.pumpWidget(
+        _host(
+          ReportSheet(types: _types(), address: null, allowDescription: false),
+          onPop: (r) => draft = r,
+        ),
+      );
+      await _open(tester);
+
+      expect(find.byType(TextField), findsNothing);
+      expect(find.text(ReportLabels.descriptionLabel), findsNothing);
+
+      await tester.tap(find.text(Severity.dangerous.label));
+      await tester.pump();
+      await tester.tap(find.widgetWithText(FilledButton, ReportLabels.send));
+      await tester.pumpAndSettle();
+
+      expect(draft, isNotNull);
+      expect(draft!.description, isNull);
+    });
+
     testWidgets('ne renvoie pas de commentaire quand le champ est laissé vide', (tester) async {
       ReportDraft? draft;
       await tester.pumpWidget(

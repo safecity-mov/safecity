@@ -11,7 +11,7 @@ contredits par le collectif, pour repérer un saboteur sans relier un identifian
 danger ; **gérer le
 catalogue des types** et leurs icônes, celles de l'app étant là d'office, les autres choisies
 parmi les glyphes Material Symbols ou téléversées en PNG ;
-**régler les seuils de résolution** du §6.1 et les paliers de proximité du §6.2, les mêmes
+**régler les seuils de résolution** du §6.1, les paliers de proximité du §6.2 et l'ouverture de la précision libre (0240), les mêmes
 pour tous les types. Plus les **téléchargements de l'APK**, comptés depuis le journal de Caddy, sans adresse, et le **journal d'audit**, en lecture seule — les réglages y entrent
 comme le reste.
 

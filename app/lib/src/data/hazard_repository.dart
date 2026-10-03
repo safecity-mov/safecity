@@ -216,6 +216,10 @@ class HazardRepository {
   /// « 1 vote sur 1 » là où le serveur en demande 2 serait faux dès l'écran suivant.
   ModerationRules _rules = ModerationRules.fallback;
 
+  /// Les règles telles que lues en dernier : ce que la feuille de signalement
+  /// consulte pour savoir si la précision libre est ouverte.
+  ModerationRules get rules => _rules;
+
   Future<void> _refreshRules() async {
     try {
       _rules = await _api.fetchModerationRules();

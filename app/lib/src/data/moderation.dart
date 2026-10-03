@@ -5,7 +5,7 @@
 /// et deux versions de l'app installées en même temps doivent dire la même chose —
 /// d'où une règle lue, comme les paliers de proximité (§6.2), et non compilée.
 class ModerationRules {
-  const ModerationRules({required this.minResolveVotes});
+  const ModerationRules({required this.minResolveVotes, this.descriptionsEnabled = true});
 
   /// Ce que dit le §0 tant que le serveur n'a rien dit. Un geste doit pouvoir
   /// partir, et un marqueur s'afficher, même au tout premier lancement hors ligne.
@@ -18,10 +18,18 @@ class ModerationRules {
   /// signalement qu'elle vient de créer. Le serveur les applique, elle non.
   final int minResolveVotes;
 
+  /// La précision libre est-elle ouverte (§4.3 amendé, 0240) ? À faux, la
+  /// feuille de signalement n'offre pas le champ ; le serveur, de toute façon,
+  /// ne garderait rien.
+  final bool descriptionsEnabled;
+
   /// PostgREST rend une liste d'une ligne : la table n'en a qu'une.
   factory ModerationRules.fromJson(List<dynamic> rows) {
     if (rows.isEmpty) return fallback;
     final row = rows.first as Map<String, dynamic>;
-    return ModerationRules(minResolveVotes: row['min_resolve_votes'] as int);
+    return ModerationRules(
+      minResolveVotes: row['min_resolve_votes'] as int,
+      descriptionsEnabled: (row['descriptions_enabled'] as bool?) ?? true,
+    );
   }
 }

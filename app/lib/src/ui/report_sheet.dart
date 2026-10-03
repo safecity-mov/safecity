@@ -28,13 +28,22 @@ class ReportDraft {
 ///
 /// Le sélecteur de type est masqué tant qu'un seul type est activé (§3).
 class ReportSheet extends StatefulWidget {
-  const ReportSheet({super.key, required this.types, required this.address});
+  const ReportSheet({
+    super.key,
+    required this.types,
+    required this.address,
+    this.allowDescription = true,
+  });
 
   final List<HazardType> types;
 
   /// Adresse approchée du pin, si le géocodage inverse est disponible.
   /// Il ne l'est pas encore : Photon arrive plus tard.
   final String? address;
+
+  /// La précision libre peut être coupée depuis la console (§4.3 amendé) : le
+  /// champ disparaît alors, et le brouillon part sans texte.
+  final bool allowDescription;
 
   @override
   State<ReportSheet> createState() => _ReportSheetState();
@@ -123,19 +132,21 @@ class _ReportSheetState extends State<ReportSheet> {
               ),
               const SizedBox(height: 20),
 
-              TextField(
-                controller: _description,
-                maxLength: 140,
-                maxLines: 2,
-                textCapitalization: TextCapitalization.sentences,
-                inputFormatters: [LengthLimitingTextInputFormatter(140)],
-                decoration: const InputDecoration(
-                  labelText: ReportLabels.descriptionLabel,
-                  helperText: ReportLabels.descriptionHelper,
-                  border: OutlineInputBorder(),
+              if (widget.allowDescription) ...[
+                TextField(
+                  controller: _description,
+                  maxLength: 140,
+                  maxLines: 2,
+                  textCapitalization: TextCapitalization.sentences,
+                  inputFormatters: [LengthLimitingTextInputFormatter(140)],
+                  decoration: const InputDecoration(
+                    labelText: ReportLabels.descriptionLabel,
+                    helperText: ReportLabels.descriptionHelper,
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
+                const SizedBox(height: 8),
+              ],
 
               FilledButton.icon(
                 onPressed: _canSubmit
@@ -143,8 +154,9 @@ class _ReportSheetState extends State<ReportSheet> {
                           ReportDraft(
                             type: _type!,
                             severity: _severity!,
-                            description:
-                                _description.text.trim().isEmpty ? null : _description.text.trim(),
+                            description: !widget.allowDescription || _description.text.trim().isEmpty
+                                ? null
+                                : _description.text.trim(),
                           ),
                         )
                     : null,

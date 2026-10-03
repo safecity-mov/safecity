@@ -651,7 +651,11 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
       context: context,
       isScrollControlled: true,
       showDragHandle: false,
-      builder: (_) => ReportSheet(types: _types, address: null),
+      builder: (_) => ReportSheet(
+        types: _types,
+        address: null,
+        allowDescription: widget.repo.rules.descriptionsEnabled,
+      ),
     );
     if (draft == null || !mounted) return;
 

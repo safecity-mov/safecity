@@ -14,6 +14,7 @@
 	let rythme = $state(untrack(() => data.rules.confirmations_per_resolve_vote));
 	let plafond = $state(untrack(() => data.rules.max_resolve_votes));
 	let signalement = $state(untrack(() => data.rules.report_confirmations));
+	let precision = $state(untrack(() => data.rules.descriptions_enabled ?? true));
 
 	const palier = (/** @type {number} */ tier) =>
 		data.tiers.find((/** @type {{ tier: number }} */ t) => t.tier === tier);
@@ -85,6 +86,19 @@
 			<input type="number" name="report_confirmations" bind:value={signalement} min="1" max="10" required />
 			<small>confirmations sur place, dans le poids « présent »</small>
 		</label>
+		<label class="case">
+			<input type="checkbox" name="descriptions_enabled" bind:checked={precision} />
+			Précision libre ouverte
+			<small>
+				{#if precision}
+					le champ « Précision » (140 caractères, public et définitif) est proposé au signalement
+				{:else}
+					coupée : le champ disparaît de l'app, le serveur n'enregistre aucun texte, même envoyé,
+					et les précisions déjà écrites sont masquées, sans être effacées. La console les voit
+					encore, pour pouvoir en effacer une depuis la carte.
+				{/if}
+			</small>
+		</label>
 		<button type="submit">Enregistrer</button>
 	</div>
 </form>
@@ -154,6 +168,9 @@
 </p>
 
 <style>
+	.case { display: block; }
+	.case input { width: auto; margin-right: 0.4rem; vertical-align: middle; }
+	.case small { display: block; margin-top: 0.25rem; }
 	.note strong { color: #1b1f24; }
 	.carte { background: #fff; border: 1px solid #e6e9ee; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; }
 	.champs { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }

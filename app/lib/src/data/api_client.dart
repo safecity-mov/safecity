@@ -126,7 +126,7 @@ class ApiClient {
   /// pas, et deux versions installées en même temps doivent annoncer le même seuil.
   Future<ModerationRules> fetchModerationRules() async {
     final response = await _http
-        .get(Uri.parse('$_baseUrl/moderation_settings?select=min_resolve_votes'))
+        .get(Uri.parse('$_baseUrl/moderation_settings?select=min_resolve_votes,descriptions_enabled'))
         .timeout(_timeout);
 
     if (response.statusCode >= 400) {

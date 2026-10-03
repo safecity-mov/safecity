@@ -46,7 +46,9 @@ export const actions = {
 					'Un signalement vaut',
 					1,
 					10
-				)
+				),
+				// Une case à cocher absente du formulaire vaut « décochée » : c'est bien « coupée ».
+				descriptions_enabled: form.get('descriptions_enabled') === 'on'
 			};
 			// La base le refuse aussi (CHECK), mais son message parlerait de contrainte violée.
 			if (patch.max_resolve_votes < patch.min_resolve_votes) {
@@ -63,7 +65,13 @@ export const actions = {
 			if (!rows[0]) {
 				throw new ApiError('Aucun réglage enregistré : la ligne est introuvable.', 404);
 			}
-			return { message: 'Seuils enregistrés. Ils valent pour tous les types.' };
+			return {
+				message: patch.descriptions_enabled
+					? 'Seuils enregistrés. Ils valent pour tous les types.'
+					: 'Seuils enregistrés, précision libre coupée : le serveur ne garde plus aucun texte ' +
+						'sur les nouveaux signalements, masque ceux qui existent, et les applications ' +
+						'retirent le champ à leur prochain retour au premier plan.'
+			};
 		});
 	},
 
