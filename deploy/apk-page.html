@@ -107,7 +107,17 @@
   <h1>{{APP_NAME}}</h1>
   <p class="chapeau">Bêta fermée. {{SUMMARY}} Android 8 et plus.</p>
 
-  <h2>Recevoir les mises à jour automatiquement</h2>
+  <h2>Installer le fichier</h2>
+
+  <div class="carte">
+    <h3>Téléchargement</h3>
+    {{VERSION_BLOCK}}
+  </div>
+
+  <p style="color:var(--discret);font-size:.88rem">Android demandera l'autorisation
+  d'installer des applications depuis cette source.</p>
+
+  <h2>Ou recevoir les mises à jour automatiquement</h2>
 
   <div class="carte">
     <h3>Par F-Droid</h3>
@@ -122,18 +132,6 @@
     <p style="color:var(--discret);font-size:.88rem">L'empreinte en fin d'adresse n'est pas
     décorative : sans elle, F-Droid accepterait n'importe quel index signé par n'importe qui.</p>
   </div>
-
-  <h2>Ou installer le fichier directement</h2>
-
-  <div class="carte">
-    <h3>Téléchargement</h3>
-    {{VERSION_BLOCK}}
-  </div>
-
-  <p style="color:var(--discret);font-size:.88rem">Android demandera l'autorisation
-  d'installer des applications depuis cette source. C'est la contrepartie d'une app qui
-  n'est sur aucun magasin : la publication sur le Play Store exige une pièce d'identité et
-  une adresse résidentielle rendue publique.</p>
 
   <h2>Ce que l'app fait de vos données</h2>
   <p>Aucun compte, aucune analytics, aucune requête vers un autre domaine que celui-ci —
