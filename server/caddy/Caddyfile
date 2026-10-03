@@ -1,0 +1,318 @@
+# L'application — frontal (SPEC §7).
+{
+	# Aucune adresse e-mail fournie à Let's Encrypt : elle n'est pas obligatoire, et
+	# l'éditeur publie sous pseudonyme (§12.6). Pour recevoir les alertes d'expiration,
+	# ajouter ici « email adresse@example.org ».
+	admin off
+	# §11.1 : aucun journal d'accès pendant la bêta. La limitation de débit ci-dessous n'en a
+	# pas besoin : elle compte en mémoire, sur la fenêtre qui court, et oublie.
+	log {
+		output discard
+	}
+	# Le module n'est pas dans l'ordre des directives de Caddy : on lui donne sa place, avant
+	# tout ce qui coûte (proxy, fichiers), pour que le refus soit gratuit.
+	order rate_limit before basicauth
+}
+
+(tiles) {
+	# Tuiles vectorielles découpées depuis le PMTiles, pour les clients qui
+	# attendent des /z/x/y (c'est le cas de MapLibre Native côté Flutter).
+	# Nécessite le profil « tiles » : docker compose --profile tiles up -d
+	handle /tiles/basemap/* {
+		uri strip_prefix /tiles
+		header Access-Control-Allow-Origin "*"
+		# Le cache d'un jour ne vaut que pour une tuile servie. Posé par `header`, il partait
+		# aussi sur le 502 rendu quand tileserver ne répond pas — et un 502 assorti d'un
+		# `max-age` explicite est cachable : le navigateur gardait la carte blanche au centre
+		# une journée entière, pendant que les bords, jamais demandés, se chargeaient.
+		reverse_proxy tileserver:8080 {
+			@ok status 2xx
+			handle_response @ok {
+				header Cache-Control "public, max-age=86400"
+				copy_response
+			}
+		}
+	}
+
+	# Le style, pour le téléchargement de zones hors ligne (§10). MapLibre veut
+	# une URL de style : il refuse un contenu, un file:// et un chemin nu. Le
+	# fichier porte l'adresse de base en gabarit, rendue ici à partir de l'hôte
+	# demandé — la même copie répond donc au téléphone qui vient par
+	# 127.0.0.1:8080 et au domaine public.
+	handle /tiles/style.json {
+		uri strip_prefix /tiles
+		root * /srv/tiles
+		# `templates` ne rend que le HTML et le texte par défaut : sans ce
+		# `mime`, le style sort tel quel, gabarit compris.
+		templates {
+			mime application/json
+		}
+		header Access-Control-Allow-Origin "*"
+		header Cache-Control "no-cache"
+		file_server
+	}
+
+	# Le PMTiles brut, et les glyphes de police des étiquettes. Servis
+	# statiquement ; les requêtes par plage d'octets sont gérées par file_server.
+	handle /tiles/* {
+		uri strip_prefix /tiles
+		root * /srv/tiles
+		header Access-Control-Allow-Origin "*"
+		header Access-Control-Allow-Headers "Range"
+		header Access-Control-Expose-Headers "Content-Length,Content-Range"
+		header Cache-Control "public, max-age=86400"
+		file_server {
+			precompressed
+		}
+	}
+}
+
+(app) {
+	log {
+		output discard
+	}
+
+	# Le journal des blocages : ce que la limitation de débit a refusé (429), pour savoir si
+	# elle sert. Même règle que celui des téléchargements : l'heure, le chemin, le code, et
+	# rien d'autre — pas d'adresse, donc pas moyen de dire si c'est une adresse qui insiste
+	# ou cent. Alimenté par `handle_errors 429` plus bas.
+	log blocked {
+		no_hostname
+		output file /var/log/caddy/blocked.log {
+			roll_size 10MiB
+			roll_keep 5
+			roll_uncompressed
+			mode 0644
+		}
+		format filter {
+			wrap json {
+				time_format iso8601
+				level_key ""
+				name_key ""
+				message_key ""
+			}
+			fields {
+				# Le chemin sans sa chaîne de requête : une lecture de zone en GET y
+				# porterait les coordonnées regardées. Le chemin seul dit quelle limite a joué.
+				request>uri regexp \?.*$ ""
+				lang delete
+				user_id delete
+				duration delete
+				size delete
+				bytes_read delete
+				resp_headers delete
+				request>remote_ip delete
+				request>remote_port delete
+				request>client_ip delete
+				request>proto delete
+				request>host delete
+				request>method delete
+				request>headers delete
+				request>tls delete
+			}
+		}
+	}
+
+	# Un refus du limiteur passe par ici : on le marque pour le journal des blocages, et on
+	# répond en clair. `Retry-After`, posé par le limiteur, reste.
+	handle_errors 429 {
+		log_name blocked
+		respond "Trop de demandes : réessayez dans un instant." 429
+	}
+
+	# Le journal des téléchargements de l'APK : le seul journal d'accès du serveur, et il ne
+	# reçoit que les requêtes marquées `log_name apk` plus bas. Chaque ligne garde l'heure, le
+	# fichier servi, le code de réponse, la taille, et la langue annoncée par le navigateur
+	# (`lang`, posée par `log_append`). **Jamais l'adresse IP**, ni aucun autre en-tête : on
+	# sait quand l'APK est parti et dans quelle langue on le lisait, pas vers qui (§11.1,
+	# amendé). La langue tient lieu de pays : `de-DE` dit l'essentiel sans toucher à l'IP.
+	log apk {
+		# Sans ceci, un journal nommé dans un site reçoit quand même toutes les requêtes du
+		# site, `log_name` n'ajoutant qu'une destination de plus. Détaché de l'hôte, il ne
+		# reçoit que ce qu'on lui adresse explicitement.
+		no_hostname
+		# Dans un volume à lui (`caddy_logs`), que la console monte en lecture seule pour
+		# l'onglet Téléchargements : le volume `/data` porte aussi les clés TLS, il ne se
+		# partage pas. Lisible par tous (Caddy crée ses journaux en 0600 sinon), non compressé
+		# à la rotation, pour que la console lise les anciens fichiers aussi simplement.
+		output file /var/log/caddy/downloads.log {
+			roll_size 10MiB
+			roll_keep 5
+			roll_uncompressed
+			mode 0644
+		}
+		format filter {
+			# Niveau, nom du journal et message ne disent rien ; une clé vide les tait.
+			# L'heure reste, lisible, en UTC : `make downloads` la rend en heure de Paris.
+			wrap json {
+				time_format iso8601
+				level_key ""
+				name_key ""
+				message_key ""
+			}
+			fields {
+				user_id delete
+				duration delete
+				bytes_read delete
+				resp_headers delete
+				request>remote_ip delete
+				request>remote_port delete
+				request>client_ip delete
+				request>proto delete
+				request>host delete
+				request>headers delete
+				request>tls delete
+			}
+		}
+	}
+
+	# API PostgREST (§8). Le plus gros corps légitime est un signalement avec son commentaire
+	# de 140 caractères : quelques centaines d'octets. 64 Ko laissent de la marge et coupent
+	# court à un corps arbitraire avant qu'il n'atteigne PostgREST.
+	handle /rest/v1/* {
+		uri strip_prefix /rest/v1
+		# Limitation de débit par adresse (§6.3 amendé) : un usage normal de l'app fait
+		# quelques requêtes par minute, un script en fait des centaines par seconde. Au-delà
+		# de la fenêtre, 429 sans toucher à PostgREST. Compté en mémoire sur la minute, jamais
+		# écrit — l'adresse ne sort pas de ce compteur. Trente personnes derrière le même
+		# Wi-Fi partagent le quota : trois cents laisse dix requêtes par minute à chacune.
+		rate_limit {
+			zone api {
+				key {remote_host}
+				events 300
+				window 1m
+			}
+		}
+		request_body {
+			max_size 64KB
+		}
+		reverse_proxy rest:3000
+	}
+
+	import tiles
+
+	# Dépôt F-Droid auto-hébergé (§12.6) : les APK signés, l'index que le client F-Droid
+	# interroge, et la page qu'on donne aux testeurs. Tout est statique — rien ici n'est
+	# produit à la demande, `deploy/vps-publish.sh` écrit les fichiers une fois par version.
+	#
+	# Ce que Caddy peut servir ici est borné par le montage (docker-compose.yml) : la page
+	# et repo/, rien d'autre. La clé d'index et sa configuration vivent à côté sur l'hôte
+	# et ne sont pas dans le conteneur — la sûreté ne dépend donc pas d'une règle ici.
+	#
+	# Le cache est court et non celui des tuiles : un index gardé une journée, c'est une
+	# mise à jour que personne ne voit pendant une journée. Les APK portent leur versionCode
+	# dans leur nom, ils ne changent jamais sous une même adresse.
+	handle /fdroid/* {
+		# Seuls les APK alimentent le compteur (voir `log apk` plus haut) : ni la page, ni
+		# l'index que le client F-Droid relit périodiquement. `log_name` ne prend pas de
+		# matcher — ses arguments sont tous des noms de journaux — d'où le `log_skip` sur tout
+		# ce qui n'est pas un APK : ni `app-latest.apk`, ni son double versionné
+		# (`safe-city-0.5.2.apk`, écrit par vps-publish.sh), ni les fichiers du dépôt.
+		# Les deux sont évalués avant `strip_prefix`.
+		@page not path /fdroid/*.apk /fdroid/repo/*.apk
+		log_skip @page
+		log_name apk
+		# Les APK seuls : 57 Mo pièce, c'est de la bande passante qu'on protège. Un
+		# téléchargement par navigateur fait une dizaine de requêtes (le fichier vient par
+		# morceaux, cf. `make downloads`) : soixante par heure, c'est cinq ou six
+		# téléchargements d'affilée pour qui réessaie, et le refus dès la première boucle.
+		# Contrairement à `@page`, ce matcher est évalué APRÈS `strip_prefix` — `rate_limit`
+		# vient après `uri` dans l'ordre des directives — d'où des chemins sans /fdroid.
+		@apk path /*.apk /repo/*.apk
+		rate_limit @apk {
+			zone apk {
+				key {remote_host}
+				events 60
+				window 1h
+			}
+		}
+		# Le seul en-tête qu'on garde, sous son propre nom : tous les autres sont effacés par
+		# le filtre du journal, l'IP comprise.
+		log_append lang {http.request.header.Accept-Language}
+		uri strip_prefix /fdroid
+		root * /srv/fdroid
+		header Access-Control-Allow-Origin "*"
+		header Cache-Control "public, max-age=300"
+		file_server {
+			browse
+		}
+	}
+
+	# L'adresse courte à donner de vive voix, celle qui tient sur un papier.
+	redir /apk /fdroid/ permanent
+	redir /apk/ /fdroid/ permanent
+
+	# La racine mène à la page de téléchargement : pendant la bêta, c'est la seule chose que
+	# le domaine a à montrer. Redirection temporaire, pas permanente — le site web public
+	# (§4.2, phase 2) prendra cette adresse, et un navigateur qui aurait mémorisé un 301
+	# continuerait d'envoyer vers /fdroid/ longtemps après.
+	redir / /fdroid/
+
+	handle {
+		# Rien d'autre n'existe sur ce domaine (§4.6).
+		respond "L'application" 404
+	}
+}
+
+{$SITE_DOMAIN} {
+	header Strict-Transport-Security "max-age=31536000"
+	import app
+}
+
+# La console d'administration (§4.3), servie à l'identique sur le sous-domaine public et sur
+# le point d'entrée de développement. Un seul bloc pour les deux : des en-têtes posés d'un
+# côté seulement, c'est exactement ce qui fait qu'on teste autre chose que ce qu'on déploie.
+(console) {
+	log {
+		output discard
+	}
+
+	# Le fond de carte de l'écran Carte (§4.3), servi sous cette origine-ci. Le style.json est
+	# rendu à partir de l'hôte demandé : importé ailleurs, il renverrait la console vers le
+	# domaine public, et une console de modération n'a pas à en dépendre.
+	import tiles
+
+	# La console parle à PostgREST par le réseau interne de Compose, jamais par l'extérieur :
+	# son jeton ne traverse donc aucun réseau public, même chiffré.
+	#
+	# Ses pages ne se mettent pas en cache : elles montrent des identifiants de dangers et de
+	# terminaux, et un poste partagé ne doit pas les garder. Les tuiles, elles, gardent leur
+	# cache long (posé dans `tiles`). La Content-Security-Policy est émise par SvelteKit
+	# lui-même, avec un nonce par réponse (admin/svelte.config.js).
+	handle {
+		header {
+			Cache-Control "no-store"
+			X-Content-Type-Options "nosniff"
+			-Server
+		}
+		reverse_proxy admin:3000
+	}
+}
+
+# Sur un sous-domaine distinct du site public — pour que rien de ce qui la concerne ne partage
+# d'origine, de cookie ni de cache avec les pages publiques.
+#
+# Elle n'est pas protégée ici : l'authentification est le jeton, vérifié en base par
+# `current_admin()` à chaque requête. Ajouter un mot de passe Caddy par-dessus ne ferait que
+# déplacer le secret.
+{$ADMIN_DOMAIN} {
+	header Strict-Transport-Security "max-age=31536000"
+	import console
+}
+
+# La même, en développement, en clair, sur la boucle locale uniquement (voir
+# docker-compose.yml). Port distinct du 8080 : deux origines, deux cookies.
+:8081 {
+	import console
+}
+
+# Point d'entrée de développement, en clair : un émulateur Android ne fait pas
+# confiance au certificat interne de Caddy. Publié sur 127.0.0.1 uniquement
+# (voir docker-compose.yml), donc jamais joignable depuis l'extérieur du VPS.
+#
+# Sans nom d'hôte : l'émulateur envoie « Host: 10.0.2.2 », un poste de
+# développement « Host: localhost », et Caddy refuserait tout ce qui ne
+# correspond pas au nom déclaré.
+:8080 {
+	import app
+}

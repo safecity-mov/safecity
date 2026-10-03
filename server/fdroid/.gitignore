@@ -1,0 +1,11 @@
+# Dépôt F-Droid auto-hébergé (SPEC §12.6). Tout ce qui est ici est produit par
+# deploy/install-vps.sh et deploy/release-app.sh. Rien n'est versionné, et surtout pas
+# keystore.p12 ni config.yml, qui porte son mot de passe.
+#
+# Seuls public/ et repo/ sont montés dans Caddy (server/docker-compose.yml) : ce qui est
+# à cette racine n'est jamais servi. Les deux dossiers sont suivis, vides, pour qu'un
+# montage Docker vers un chemin absent ne les crée pas appartenant à root.
+*
+!.gitignore
+!public/
+!repo/

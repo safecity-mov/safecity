@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<!--
+  L'application — page de téléchargement de la bêta.
+
+  Gabarit rendu par deploy/vps-publish.sh à chaque publication. Les marqueurs entre doubles
+  accolades sont remplacés à ce moment-là ; le fichier servi est du HTML statique.
+
+  Rien n'est chargé depuis l'extérieur : ni police, ni feuille de style, ni script. Une page
+  qui annonce qu'aucune requête ne part vers un domaine tiers (SPEC §11.5) n'a pas à en faire
+  elle-même. Licence : AGPL-3.0.
+-->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{{APP_NAME}} — bêta fermée</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --fond: #f2efe9;
+    --carte: #ffffff;
+    --texte: #1d1c1a;
+    --discret: #5e5a54;
+    --trait: #ddd7cc;
+    --accent: #8a3324;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fond: #171614;
+      --carte: #201e1b;
+      --texte: #ece8e1;
+      --discret: #a29c92;
+      --trait: #35322d;
+      --accent: #e0765f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2.5rem 1.25rem 4rem;
+    background: var(--fond);
+    color: var(--texte);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 41rem; margin: 0 auto; }
+  h1 { font-size: 1.7rem; margin: 0 0 .25rem; letter-spacing: -.01em; }
+  h2 { font-size: 1.05rem; margin: 2.25rem 0 .6rem; }
+  p { margin: .6rem 0; }
+  .chapeau { color: var(--discret); margin-bottom: 2rem; }
+  .carte {
+    background: var(--carte);
+    border: 1px solid var(--trait);
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    margin: .9rem 0;
+  }
+  .carte h3 { margin: 0 0 .4rem; font-size: 1rem; }
+  code, .url {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .82rem;
+    word-break: break-all;
+  }
+  .url {
+    display: block;
+    background: var(--fond);
+    border: 1px solid var(--trait);
+    border-radius: 8px;
+    padding: .6rem .7rem;
+    margin: .6rem 0;
+    -webkit-user-select: all;
+    user-select: all;
+  }
+  a { color: var(--accent); }
+  .bouton {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: .65rem 1.1rem;
+    margin-top: .3rem;
+  }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: .25rem .9rem; margin: .8rem 0 0; }
+  dt { color: var(--discret); font-size: .88rem; }
+  dd { margin: 0; font-size: .88rem; }
+  dd code { font-size: .78rem; }
+  ol { padding-left: 1.2rem; }
+  li { margin: .35rem 0; }
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--trait);
+    color: var(--discret);
+    font-size: .85rem;
+  }
+  @media (max-width: 30rem) {
+    dl { grid-template-columns: 1fr; gap: 0 0; }
+    dt { margin-top: .5rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <h1>{{APP_NAME}}</h1>
+  <p class="chapeau">Bêta fermée. {{SUMMARY}} Android 8 et plus.</p>
+
+  <h2>Recevoir les mises à jour automatiquement</h2>
+
+  <div class="carte">
+    <h3>Par F-Droid</h3>
+    <p>La bêta durera. Ajouter ce dépôt une fois évite d'avoir à revenir ici à chaque
+    version : F-Droid préviendra tout seul.</p>
+    <ol>
+      <li>Installer <strong>F-Droid</strong> depuis <a href="https://f-droid.org">f-droid.org</a>.</li>
+      <li>Ouvrir F-Droid → <em>Paramètres</em> → <em>Dépôts</em> → <em>+</em>.</li>
+      <li>Coller cette adresse, empreinte comprise :</li>
+    </ol>
+    <span class="url">{{REPO_URL}}</span>
+    <p style="color:var(--discret);font-size:.88rem">L'empreinte en fin d'adresse n'est pas
+    décorative : sans elle, F-Droid accepterait n'importe quel index signé par n'importe qui.</p>
+  </div>
+
+  <h2>Ou installer le fichier directement</h2>
+
+  <div class="carte">
+    <h3>Téléchargement</h3>
+    {{VERSION_BLOCK}}
+  </div>
+
+  <p style="color:var(--discret);font-size:.88rem">Android demandera l'autorisation
+  d'installer des applications depuis cette source. C'est la contrepartie d'une app qui
+  n'est sur aucun magasin : la publication sur le Play Store exige une pièce d'identité et
+  une adresse résidentielle rendue publique.</p>
+
+  <h2>Ce que l'app fait de vos données</h2>
+  <p>Aucun compte, aucune analytics, aucune requête vers un autre domaine que celui-ci —
+  fond de carte compris. Votre position ne quitte jamais le téléphone : l'app en déduit
+  elle-même un ordre de grandeur de distance, et n'envoie que celui-là. Le lien entre un
+  terminal et ses signalements est coupé au bout de 24 heures.</p>
+  <p>Le texte complet est dans l'app, écran <em>Paramètres</em>.</p>
+
+  <footer>
+    Cartographie © OpenStreetMap contributors — ODbL.
+    Application sous Apache-2.0, serveur sous AGPL-3.0.{{SOURCE_LINK}}<br>
+    Page générée le {{GENERATED}}.
+  </footer>
+
+</main>
+</body>
+</html>

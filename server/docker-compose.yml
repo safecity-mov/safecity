@@ -1,0 +1,236 @@
+# L'application — infrastructure serveur (SPEC §7).
+# Un seul VPS, tout auto-hébergé : aucune requête de l'app ne sort vers un domaine tiers (§7, §11.5).
+#
+# Profils :
+#   (défaut)  db, rest, admin, caddy — le strict nécessaire à la bêta, console comprise (§4.3)
+#   admin     meta, studio           — Supabase Studio, pour regarder la base, jamais pour agir
+#   tiles     tileserver             — sert le PMTiles en /z/x/y si le client ne lit pas pmtiles://
+
+name: app
+
+# Les journaux Docker tournent : les `RAISE EXCEPTION` de la base y vont, et sans borne ils
+# finiraient par remplir le disque du VPS. Aucun journal d'accès n'y figure (§11.1).
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    build: ./db
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      AUTHENTICATOR_PASSWORD: ${AUTHENTICATOR_PASSWORD}
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_cron
+      - -c
+      - cron.database_name=${POSTGRES_DB}
+      # §11.1 : pas de journalisation des accès pendant la bêta.
+      - -c
+      - log_statement=none
+      - -c
+      - log_min_duration_statement=-1
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db:/db:ro
+      - ./db/bootstrap.sh:/docker-entrypoint-initdb.d/00_bootstrap.sh:ro
+    ports:
+      # Jamais exposé publiquement : accès par tunnel SSH uniquement.
+      - "127.0.0.1:5432:5432"
+    # Par TCP (-h 127.0.0.1), et non par la socket Unix qu'utilise pg_isready sans hôte.
+    # Pendant l'initialisation du volume, l'image démarre un serveur provisoire qui n'écoute
+    # que sur la socket : sans -h, il répond « prêt » alors que bootstrap.sh joue encore les
+    # migrations, PostgREST se connecte trop tôt et échoue. Le vrai serveur, celui qui écoute
+    # en TCP, n'apparaît qu'une fois l'initialisation terminée.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      # Le premier démarrage crée la base, charge PostGIS puis fait un checkpoint. Sur un
+      # VPS dont le disque est un volume réseau, ce checkpoint seul a pris 27 s de fsync, et
+      # l'initialisation deux minutes : sans délai de grâce, Compose déclarait la base
+      # malade avant qu'elle ait fini de naître, et rien derrière ne démarrait.
+      start_period: 240s
+
+  rest:
+    image: postgrest/postgrest:v12.2.3
+    restart: unless-stopped
+    logging: *logging
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${AUTHENTICATOR_PASSWORD}@db:5432/${POSTGRES_DB}
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${PGRST_JWT_SECRET}
+      PGRST_DB_POOL: 10
+      # Jamais plus de mille lignes par réponse, quoi qu'on demande : l'app n'en demande
+      # jamais autant (les dangers viennent par zone, plafonnés en SQL), et une lecture de
+      # table entière en boucle coûte alors mille lignes, pas la table. Le délai par requête
+      # est réglé sur les rôles, côté base (migration 0180).
+      PGRST_DB_MAX_ROWS: 1000
+      PGRST_LOG_LEVEL: error
+      PGRST_OPENAPI_SERVER_PROXY_URI: https://${SITE_DOMAIN}/rest/v1
+      # Serveur d'administration de PostgREST : /live et /ready. Publié ci-dessous sur la
+      # boucle locale de l'hôte, jamais par Caddy.
+      PGRST_ADMIN_SERVER_PORT: 3001
+    expose:
+      - "3000"
+    ports:
+      # « Le processus tourne » et « le service répond » sont deux choses différentes : un
+      # PostgREST qui a perdu son cache de schéma répond 503 sans mourir. `/ready` le dit,
+      # et c'est depuis l'hôte qu'on le lit — deploy/install-vps.sh, ou à la main :
+      #   curl -fsS http://127.0.0.1:3001/ready
+      #
+      # Pas de `healthcheck` Docker ici, et ce n'est pas un oubli. La variante amd64 de
+      # l'image n'a aucun shell — ni bash, ni sh — donc aucune commande de test ne peut
+      # s'exécuter dedans ; celle qu'on avait écrite passait sur un Mac parce que la
+      # variante arm64, elle, est une Ubuntu complète. Un conteneur déclaré malade à vie
+      # empêchait Caddy de démarrer sur le VPS.
+      - "127.0.0.1:3001:3001"
+
+  # Console d'administration (§4.3). Sur un sous-domaine distinct, et sans accès à autre chose
+  # qu'à PostgREST : elle ne parle jamais à la base directement.
+  admin:
+    build: ../admin
+    restart: unless-stopped
+    logging: *logging
+    depends_on:
+      # `service_started` et non `service_healthy` : rest n'a plus de contrôle de santé
+      # Docker (voir plus haut). La console réessaie d'elle-même si PostgREST n'est pas
+      # encore prêt à sa première requête.
+      rest:
+        condition: service_started
+    environment:
+      APP_API: http://rest:3000
+      # `adapter-node` refuse les POST dont l'origine ne correspond pas à celle qu'il croit
+      # servir : sans cela, tout formulaire échoue en « Cross-site POST form submissions are
+      # forbidden ». On déduit l'origine des en-têtes que pose Caddy plutôt que de la figer,
+      # sinon la console marcherait sur le sous-domaine public et pas sur le point d'entrée
+      # de développement.
+      PROTOCOL_HEADER: x-forwarded-proto
+      HOST_HEADER: x-forwarded-host
+      # Le plus gros corps attendu est une icône PNG de 64 Ko dans un formulaire multipart.
+      # Au-delà, `adapter-node` répond 413 avant même l'action — autant que ce soit pour une
+      # vraie raison, et non pour la limite par défaut de 512 Ko qu'un PNG mal préparé
+      # dépasse sans le savoir.
+      BODY_SIZE_LIMIT: 262144
+      # Les dates rendues côté serveur le sont dans le fuseau des modérateurs, pas en UTC.
+      TZ: Europe/Paris
+      # Le journal des téléchargements de l'APK (Caddyfile, `log apk`), pour l'onglet
+      # Téléchargements. Sans adresse IP par construction : rien à protéger, mais rien à
+      # écrire non plus — lecture seule.
+      DOWNLOADS_LOG_DIR: /var/log/caddy
+    volumes:
+      - caddy_logs:/var/log/caddy:ro
+    expose:
+      - "3000"
+
+  caddy:
+    # Construite ici et non tirée : l'image officielle n'a pas le limiteur de débit (caddy/Dockerfile).
+    build: ./caddy
+    restart: unless-stopped
+    logging: *logging
+    depends_on:
+      rest:
+        condition: service_started
+      admin:
+        condition: service_started
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN}
+      ADMIN_DOMAIN: ${ADMIN_DOMAIN}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./tiles/data:/srv/tiles:ro
+      # Dépôt F-Droid, produit par deploy/. Deux montages et pas un : fdroid/ contient
+      # aussi config.yml et keystore.p12 — la clé qui signe l'index et son mot de passe.
+      # Monter le dossier entier les servait à quiconque en devinait le nom. Ici Caddy ne
+      # voit que la page (public/) et ce que le client F-Droid télécharge (repo/) ; le
+      # reste n'existe pas dans le conteneur, quelle que soit la règle Caddy.
+      #
+      # Le second montage tombe *dans* le premier, qui est en lecture seule : Docker ne
+      # peut donc pas y créer le point de montage. D'où le dossier vide public/repo/,
+      # suivi par git, qui existe avant et se fait recouvrir.
+      - ./fdroid/public:/srv/fdroid:ro
+      - ./fdroid/repo:/srv/fdroid/repo:ro
+      - caddy_data:/data
+      - caddy_config:/config
+      # Le journal des téléchargements, séparé de /data (clés TLS) pour être partagé avec
+      # la console.
+      - caddy_logs:/var/log/caddy
+    ports:
+      - "80:80"
+      - "443:443"
+      # Développement : HTTP en clair, sur la boucle locale uniquement.
+      # Vu comme 10.0.2.2:8080 depuis un émulateur Android.
+      - "127.0.0.1:8080:8080"
+      # La console d'administration, sur un port distinct plutôt que sur le même :
+      # deux ports font deux origines, donc deux périmètres de cookie. Boucle locale
+      # uniquement, elle aussi.
+      - "127.0.0.1:8081:8081"
+
+  # --- Supabase Studio : pour regarder la base, pas pour agir (voir CLAUDE.md, §4.3) ---
+  # Il écrit en direct, sans passer par les fonctions qui journalisent dans `admin_actions`.
+  meta:
+    image: supabase/postgres-meta:v0.84.2
+    profiles: ["admin"]
+    restart: unless-stopped
+    logging: *logging
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: ${POSTGRES_DB}
+      PG_META_DB_USER: ${POSTGRES_USER}
+      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
+    expose:
+      - "8080"
+
+  studio:
+    image: supabase/studio:20241014-c083b3b
+    profiles: ["admin"]
+    restart: unless-stopped
+    logging: *logging
+    depends_on:
+      - meta
+    environment:
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      DEFAULT_ORGANIZATION_NAME: L'application
+      DEFAULT_PROJECT_NAME: L'application
+      SUPABASE_URL: http://rest:3000
+      SUPABASE_PUBLIC_URL: https://${SITE_DOMAIN}
+    ports:
+      # Jamais exposé publiquement (§7) : tunnel SSH -L 3000:127.0.0.1:3000
+      - "127.0.0.1:3000:3000"
+
+  # --- Tuiles servies en /z/x/y, pour les clients qui ne lisent pas pmtiles:// ---
+  # Version épinglée : `latest` changeait sous nos pieds à chaque `pull`.
+  tileserver:
+    image: ghcr.io/protomaps/go-pmtiles:v1.31.2
+    profiles: ["tiles"]
+    restart: unless-stopped
+    logging: *logging
+    command: serve /data --cors=* --public-url=https://${SITE_DOMAIN}/tiles
+    volumes:
+      - ./tiles/data:/data:ro
+    expose:
+      - "8080"
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+  caddy_logs:

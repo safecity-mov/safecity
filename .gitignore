@@ -1,0 +1,28 @@
+# Secrets et configuration locale
+.env
+server/.env
+deploy/vps.env
+
+# Clé de publication Android. Le magasin lui-même vit hors du dépôt (~/.app) ;
+# ce fichier porte son mot de passe (deploy/keystore.sh).
+app/android/key.properties
+
+# Fond de carte et glyphes : plusieurs centaines de Mo, régénérables
+# (make tiles, puis ./tiles/fetch-assets.sh)
+server/tiles/data/
+
+# Divers
+.DS_Store
+
+# Flutter
+app/.dart_tool/
+app/build/
+app/.flutter-plugins*
+app/android/local.properties
+app/android/.gradle/
+app/android/app/build/
+app/*.iml
+app/android/**/*.iml
+
+# PDF de la fiche, régénéré à la demande depuis NEW-INSTANCE.md
+deploy/*.pdf

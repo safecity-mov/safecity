@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Requis par l'outillage Flutter pour communiquer avec l'app en cours
+         d'exécution (rechargement à chaud, débogueur). -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <application
+        android:networkSecurityConfig="@xml/network_security_config"
+        tools:replace="android:networkSecurityConfig" />
+</manifest>

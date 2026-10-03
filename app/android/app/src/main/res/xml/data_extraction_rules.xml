@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12+ : transfert d'appareil à appareil et sauvegarde dans le nuage.
+  Les deux sont refusés en bloc. Rien de ce que l'app écrit sur le disque ne
+  doit partir ailleurs : la base locale porte le catalogue, le cache de dangers
+  et les mesures de la bêta, le stockage chiffré porte l'identifiant de terminal
+  (§11). La file d'attente, elle, vit en mémoire et n'est jamais écrite.
+
+  Réinstaller l'app repart donc d'une identité neuve. C'est le comportement
+  voulu : l'identifiant est jetable et régénérable à tout moment (§11.4).
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </device-transfer>
+</data-extraction-rules>

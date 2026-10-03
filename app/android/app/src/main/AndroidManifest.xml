@@ -1,0 +1,87 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Position lue uniquement au moment d'un geste explicite (SPEC §11.1).
+         ACCESS_BACKGROUND_LOCATION n'est volontairement PAS demandée : l'app ne
+         suit aucun trajet et ne lit jamais le GPS en arrière-plan. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Le SDK MapLibre apporte par fusion de manifeste l'accès à l'état du Wi-Fi et la
+         déclaration matérielle qui va avec. Il n'en a pas besoin : il détecte la connexion
+         par l'état du réseau (ACCESS_NETWORK_STATE, conservé). Depuis Android 13, cette
+         permission s'affiche pourtant sous « Appareils à proximité », accordée d'office — un
+         libellé qui dit le contraire de ce que l'app promet (§11.5). On la retire donc du
+         binaire ; deploy/release-app.sh liste les permissions restantes à chaque publication. -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" tools:node="remove" />
+    <uses-feature android:name="android.hardware.wifi" tools:node="remove" />
+
+    <!-- Le GPS n'est pas obligatoire : refuser la localisation reste un usage
+         possible, les actions pèsent simplement moins (§6.2). -->
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+
+    <!-- La sauvegarde automatique d'Android téléverse les fichiers de l'app chez
+         Google. Elle emporterait la base locale — catalogue, cache de
+         dangers, mesures de la bêta — et le stockage chiffré qui porte
+         l'identifiant de terminal. Rien de tout cela ne doit quitter l'appareil
+         autrement que par les appels de l'app (§11.1, §11.5). Désactivée sur les
+         deux mécanismes : `allowBackup` pour l'ancien, `dataExtractionRules`
+         pour le transfert d'appareil à appareil d'Android 12+. -->
+    <!-- Le nom sous l'icône. La même chaîne est écrite en Dart dans
+         lib/src/ui/labels.dart (AppLabels.appName) ; deploy/release-app.sh refuse un
+         APK où les deux divergent. -->
+    <application
+        android:label="Safe city"
+        android:name="${applicationName}"
+        android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:icon="@mipmap/ic_launcher">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity=""
+            android:theme="@style/LaunchTheme"
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+            android:hardwareAccelerated="true"
+            android:windowSoftInputMode="adjustResize">
+            <!-- Specifies an Android theme to apply to this Activity as soon as
+                 the Android process has started. This theme is visible to the user
+                 while the Flutter UI initializes. After that, this theme continues
+                 to determine the Window background behind the Flutter UI. -->
+            <meta-data
+              android:name="io.flutter.embedding.android.NormalTheme"
+              android:resource="@style/NormalTheme"
+              />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <!-- Oubli des traces de localisation (§11.1). Réveillé par une alarme
+             système 45 minutes après le passage en arrière-plan, y compris si
+             Android a tué le processus entre-temps. Jamais exporté : rien
+             d'extérieur à l'app n'a à déclencher une purge. -->
+        <receiver
+            android:name=".TraceSweepReceiver"
+            android:exported="false" />
+
+        <!-- Don't delete the meta-data below.
+             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
+    </application>
+    <!-- Required to query activities that can process text, see:
+         https://developer.android.com/training/package-visibility and
+         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+
+         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
+</manifest>

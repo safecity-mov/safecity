@@ -1,0 +1,45 @@
+name: app
+description: Signalement collaboratif des dangers dans l'espace public. Pilote parisien.
+publish_to: none
+version: 0.7.0+24
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Rendu carte. MapLibre Native : pas de SDK cartographique fermé (§7, §12.6).
+  # La localisation passe par un canal natif maison, voir
+  # lib/src/location/location_service.dart : aucun paquet du marché ne sait se
+  # passer des Google Play Services sur Android (§12.6).
+  maplibre_gl: ^0.27.1
+
+  # Identité anonyme : un UUID de device, en stockage chiffré (§0, §11).
+  flutter_secure_storage: ^9.2.2
+  uuid: ^4.5.1
+
+  http: ^1.2.2
+  intl: ^0.19.0
+  drift: ^2.35.0
+  path_provider: ^2.1.6
+  path: ^1.9.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  drift_dev: ^2.35.0
+  build_runner: ^2.16.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/map_style.json
+    # La version courte, une page : celle que l'écran Confidentialité ouvre.
+    - assets/privacy.md
+    # La version détaillée, copie de ../PRIVACY.md qui reste la source.
+    # `privacy_text_test.dart` casse si les deux divergent : Flutter ne sait
+    # pas embarquer un fichier situé hors du paquet.
+    - assets/privacy-full.md

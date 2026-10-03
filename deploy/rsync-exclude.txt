@@ -1,0 +1,38 @@
+# L'application — ce qui ne monte JAMAIS sur le VPS.
+#
+#   ./deploy/push-server.sh   — soit : rsync -a --chmod=Dgo+rx,Fgo+r --exclude-from=ce fichier
+#
+# Cette liste n'est pas une optimisation de bande passante. Les trois premières entrées
+# écraseraient l'état du serveur par celui du poste de développement, et deux d'entre elles
+# sont irréparables. À relire avant d'y toucher.
+
+# --- Ce qui détruirait l'instance -------------------------------------------
+
+# Les secrets de la base, tirés au sort sur le VPS à la première installation. Ceux du Mac
+# sont ceux du développement : les écraser donnerait un PostgREST qui ne peut plus se
+# connecter à sa propre base, et des jetons d'administration tous révoqués d'un coup.
+server/.env
+
+# Le dépôt F-Droid : la clé qui signe l'index, et tous les APK déjà publiés. L'écraser
+# oblige chaque testeur à retirer puis rajouter le dépôt — son empreinte est dans l'URL.
+server/fdroid/
+
+# 9,5 Go de fond de carte, extraits sur le VPS. Les renvoyer depuis le Mac prendrait des
+# heures pour remplacer un fichier identique.
+server/tiles/data/
+
+# --- Ce qui ne doit pas quitter le Mac --------------------------------------
+
+# Le mot de passe de la clé de publication. La clé elle-même vit dans ~/.app et ne
+# part donc jamais ; envoyer son mot de passe sur le serveur viderait de son sens le fait
+# de l'avoir gardée ici.
+app/android/key.properties
+
+# --- Ce qui est volumineux et se régénère -----------------------------------
+.git/
+app/build/
+app/.dart_tool/
+app/android/.gradle/
+admin/node_modules/
+admin/.svelte-kit/
+admin/build/

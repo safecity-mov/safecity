@@ -1,0 +1,5 @@
+# Racine servie par Caddy. repo/ y est un dossier vide, point de montage du vrai repo/
+# (docker-compose.yml) : il doit exister avant le démarrage, et rien ne s'y écrit jamais.
+*
+!.gitignore
+!repo/
