@@ -83,7 +83,7 @@ void main() {
     // Un seul type : la feuille des filtres n'a pas de choix à proposer.
     await tester.tap(find.byTooltip(MapLabels.filters));
     await tester.pumpAndSettle();
-    expect(find.text('Éclairage défaillant'), findsNothing);
+    expect(find.byTooltip('Éclairage défaillant'), findsNothing);
     await tester.tap(find.text(FiltersLabels.apply));
     await tester.pumpAndSettle();
 
@@ -93,7 +93,7 @@ void main() {
 
     await tester.tap(find.byTooltip(MapLabels.filters));
     await tester.pumpAndSettle();
-    expect(find.text('Éclairage défaillant'), findsOneWidget);
+    expect(find.byTooltip('Éclairage défaillant'), findsOneWidget);
   });
 
   testWidgets('une version publiée entre-temps est annoncée au retour au premier plan',

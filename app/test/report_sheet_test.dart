@@ -15,7 +15,7 @@ void main() {
 
       expect(find.text(ReportLabels.severitySection), findsOneWidget);
       expect(find.text(ReportLabels.typeSection), findsNothing);
-      expect(find.text('Nid-de-poule'), findsNothing);
+      expect(find.byTooltip('Nid-de-poule'), findsNothing);
     });
 
     testWidgets('affiche le sélecteur dès qu\'un second type est activé', (tester) async {
@@ -27,11 +27,14 @@ void main() {
       await _open(tester);
 
       expect(find.text(ReportLabels.typeSection), findsOneWidget);
-      expect(find.text('Nid-de-poule'), findsOneWidget);
-      expect(find.text('Verre brisé, gravats, débris'), findsOneWidget);
+      // Le type se reconnaît à son icône ; son nom n'est plus affiché, il reste
+      // au lecteur d'écran et à l'appui long.
+      expect(find.byTooltip('Nid-de-poule'), findsOneWidget);
+      expect(find.byTooltip('Verre brisé, gravats, débris'), findsOneWidget);
+      expect(find.text('Nid-de-poule'), findsNothing);
     });
 
-    testWidgets('n\'autorise l\'envoi qu\'une fois la gravité choisie', (tester) async {
+    testWidgets('n\'autorise l\'envoi qu\'une fois le niveau choisi', (tester) async {
       await tester.pumpWidget(_host(ReportSheet(types: _types(), address: null)));
       await _open(tester);
 

@@ -57,21 +57,25 @@ class HazardDetailSheet extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: hazard.severity.color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
+                // L'icône dit le type, sans libellé (amendement) ; le nom reste
+                // au lecteur d'écran.
+                Semantics(
+                  label: type.label,
+                  image: true,
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: hazard.severity.color.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: type.iconWidget(size: 26, color: hazard.severity.color),
                   ),
-                  child: type.iconWidget(size: 26, color: hazard.severity.color),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(type.label, style: theme.textTheme.titleMedium),
-                      const SizedBox(height: 2),
                       Row(
                         children: [
                           SeverityIndicator(hazard.severity, height: 14, withLabel: true),

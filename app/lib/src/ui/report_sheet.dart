@@ -98,9 +98,12 @@ class _ReportSheetState extends State<ReportSheet> {
                   runSpacing: 8,
                   children: [
                     for (final type in _selectable)
+                      // L'icône seule (amendement) : le nom reste au lecteur
+                      // d'écran et à l'appui long, par le tooltip.
                       ChoiceChip(
-                        avatar: type.iconWidget(size: 18),
-                        label: Text(type.label),
+                        label: type.iconWidget(size: 24),
+                        labelPadding: const EdgeInsets.all(4),
+                        tooltip: type.label,
                         selected: _type == type,
                         onSelected: (_) => setState(() => _type = type),
                       ),

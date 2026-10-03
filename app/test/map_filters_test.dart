@@ -45,7 +45,7 @@ void main() {
       expect(find.text(FiltersLabels.typesSection), findsOneWidget);
     });
 
-    testWidgets('renvoie la gravité choisie', (tester) async {
+    testWidgets('renvoie le niveau choisi', (tester) async {
       MapFilters? result;
       await _open(tester, types: _types(), onPop: (f) => result = f);
 
@@ -58,7 +58,7 @@ void main() {
       expect(result!.isActive, isTrue);
     });
 
-    testWidgets('« Toutes » remet la gravité à zéro', (tester) async {
+    testWidgets('« Tous » remet le niveau à zéro', (tester) async {
       MapFilters? result;
       await _open(
         tester,
@@ -88,8 +88,10 @@ void main() {
       // dangers de ce type restent sur la carte (§4.3).
       await _open(tester, types: _types(debrisEnabled: true));
 
-      expect(find.text('Nid-de-poule'), findsOneWidget);
-      expect(find.text('Éclairage défaillant'), findsNothing);
+      expect(find.byTooltip('Nid-de-poule'), findsOneWidget);
+      expect(find.byTooltip('Éclairage défaillant'), findsNothing);
+      // Et sans libellé visible : l'icône suffit (amendement).
+      expect(find.text('Nid-de-poule'), findsNothing);
     });
   });
 }

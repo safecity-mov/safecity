@@ -81,8 +81,9 @@ class _MapFiltersSheetState extends State<MapFiltersSheet> {
                 children: [
                   for (final type in selectable)
                     FilterChip(
-                      avatar: type.iconWidget(size: 18),
-                      label: Text(type.label),
+                      label: type.iconWidget(size: 24),
+                      labelPadding: const EdgeInsets.all(4),
+                      tooltip: type.label,
                       selected: _filters.types.contains(type.code),
                       onSelected: (on) => setState(() {
                         final next = Set<String>.from(_filters.types);

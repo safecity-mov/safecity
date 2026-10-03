@@ -105,7 +105,7 @@ l'écran de signalement se réduit à gravité + photo + texte.
 | F2b | Anti-doublon | Si un danger actif **du même type** existe à moins de 15 m : « Est-ce celui-ci ? » → Confirmer plutôt que créer. |
 | F3 | Confirmer | « Toujours là ». Met à jour `last_confirmed_at` et pèse dans le poids « présent » du danger, selon la proximité (§6.1, §6.2 amendés). |
 | F4 | Marquer résolu | La « suppression » collaborative. Le bouton dit **« Plus là »**, le pendant exact de « Toujours là » (amendement ; il portait le verbe du type). Règles en §6. |
-| F5 | Détail | Type, niveau, date, nom de la voie (lu dans le fond de carte, §7), historique — c'est lui qui montre les confirmations, geste par geste. Photos abandonnées pour la bêta (§4.6). |
+| F5 | Détail | Type (par son icône, sans libellé — amendement), niveau, date, nom de la voie (lu dans le fond de carte, §7), historique — c'est lui qui montre les confirmations, geste par geste. Photos abandonnées pour la bêta (§4.6). |
 | F6 | Hors-ligne | File d'attente locale des actions, cache des dangers et des tuiles consultées, synchronisation à la reconnexion. |
 | F7 | Signaler un abus | Flag avec motif. |
 | F8 | Paramètres | À propos, licences, attribution OpenStreetMap, effacer mes données, régénérer mon identifiant. **Sans export** (amendement) : voir §11.4. |
@@ -706,7 +706,8 @@ calculer `proximity` et ne le persistent nulle part (§11).
    de l'utilisateur. FAB central « + », recentrer, filtres type et niveau (le calque « résolus
    récemment » est retiré, §6.1). Marqueur : icône du type **et** couleur de niveau (jamais la couleur seule).
 2. **Nouveau signalement** (bottom sheet). Mini-carte avec pin ajustable, sélecteur de type
-   (rangée d'icônes, masquée si un seul type activé), 3 boutons de niveau, « 1 », « 2 »,
+   (rangée d'icônes sans libellé, le nom à l'appui long et au lecteur d'écran — amendement ;
+   masquée si un seul type activé), 3 boutons de niveau, « 1 », « 2 »,
    « 3 », chacun avec sa jauge (amendement : plus de libellés), photo, texte, « Envoyer ». Objectif : moins de 10 secondes.
 3. **Détail** (bottom sheet). Photo, type, niveau, « signalé il y a 3 j », adresse, la
    chronologie des gestes et la **balance** : une barre à deux moitiés, poids « toujours là »
