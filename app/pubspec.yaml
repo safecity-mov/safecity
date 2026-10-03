@@ -1,7 +1,7 @@
 name: app
 description: Signalement collaboratif des dangers dans l'espace public. Pilote parisien.
 publish_to: none
-version: 0.7.0+24
+version: 0.7.1+25
 
 environment:
   sdk: ^3.5.0
