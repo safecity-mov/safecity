@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../data/models/hazard_type.dart';
 import '../data/models/severity.dart';
+import 'widgets/severity_indicator.dart';
 import 'labels.dart';
 
 /// Ce que l'utilisateur a saisi. Le sheet ne connaît ni le réseau ni le device :
@@ -22,7 +23,7 @@ class ReportDraft {
 /// Nouveau signalement (§9, écran 2).
 ///
 /// Objectif affiché du produit : moins de 10 secondes entre l'ouverture et
-/// l'envoi. D'où l'ordre des champs — la gravité, seule saisie obligatoire, est
+/// l'envoi. D'où l'ordre des champs — le niveau, seule saisie obligatoire, est
 /// en premier, et tout le reste est facultatif.
 ///
 /// Le sélecteur de type est masqué tant qu'un seul type est activé (§3).
@@ -88,7 +89,7 @@ class _ReportSheetState extends State<ReportSheet> {
               const SizedBox(height: 20),
 
               // Masqué tant qu'un seul type est activé : l'écran se réduit alors
-              // à gravité + commentaire (§3).
+              // à niveau + commentaire (§3).
               if (_selectable.length > 1) ...[
                 const Text(ReportLabels.typeSection, style: TextStyle(fontWeight: FontWeight.w600)),
                 const SizedBox(height: 8),
@@ -169,7 +170,8 @@ class _SeverityRow extends StatelessWidget {
               child: Semantics(
                 button: true,
                 selected: value == severity,
-                label: ReportLabels.severityOption(severity.label),
+                label: ReportLabels.severityOption(severity.value),
+                excludeSemantics: true,
                 child: InkWell(
                   onTap: () => onChanged(severity),
                   borderRadius: BorderRadius.circular(12),
@@ -187,13 +189,14 @@ class _SeverityRow extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(severity.icon, color: severity.color, size: 24),
+                        SeverityIndicator(severity, height: 22),
                         const SizedBox(height: 6),
                         Text(
                           severity.label,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 18,
+                            color: value == severity ? severity.color : null,
                             fontWeight: value == severity ? FontWeight.w700 : FontWeight.w500,
                           ),
                         ),

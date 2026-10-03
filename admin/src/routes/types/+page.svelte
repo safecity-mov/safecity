@@ -42,7 +42,7 @@
 </p>
 <p class="note">
 	<strong>L'icône est une silhouette, pas une image en couleurs.</strong> Le marqueur est un
-	disque coloré par la gravité, qui s'inverse quand le danger est contesté : l'application
+	disque coloré par le niveau, qui s'inverse quand le danger est contesté : l'application
 	n'utilise donc que la transparence du fichier et peint la forme elle-même. Le plus simple
 	est de choisir un glyphe Material Symbols dans la grille, la famille qui a succédé aux
 	dessins d'origine de l'application. On peut aussi téléverser un PNG carré à fond

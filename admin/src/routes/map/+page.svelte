@@ -29,7 +29,7 @@
 		}))
 	});
 
-	/** Les mêmes rayons que l'app (`Severity.markerRadius`) : le diamètre dit la gravité. */
+	/** Les mêmes rayons que l'app (`Severity.markerRadius`) : le diamètre dit le niveau. */
 	const RADIUS = /** @type {any} */ (['match', ['get', 'severity'], 1, 9, 2, 12, 15]);
 	/**
 	 * Un peu plus petits de loin, pour que les points voisins restent distincts. `zoom` ne
@@ -338,8 +338,8 @@
 				<dt>Position</dt>
 				<dd class="mono">{hazard.lat.toFixed(5)}, {hazard.lng.toFixed(5)}</dd>
 				{#if hazard.address}<dt>Adresse</dt><dd>{hazard.address}</dd>{/if}
-				<dt>Gravité</dt>
-				<dd>{hazard.severity}</dd>
+				<dt>Niveau</dt>
+				<dd>{hazard.severity} / 3</dd>
 				<dt>Poids « présent »</dt>
 				<dd>{hazard.confirm_weight.toFixed(1)} <small>({count(hazard.events_count, 'geste')})</small></dd>
 				<dt>Signalements</dt>
@@ -387,7 +387,7 @@
 		{#each Object.entries(STATUS_COLORS) as [value, color] (value)}
 			<li><span class="pastille" style="background: {color}"></span>{statusLabel(value)}</li>
 		{/each}
-		<li class="lecture">icône : type · diamètre : gravité · creux : signalé résolu</li>
+		<li class="lecture">icône : type · diamètre : niveau · creux : signalé résolu</li>
 	</ul>
 </div>
 

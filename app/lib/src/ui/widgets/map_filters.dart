@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/models/hazard_type.dart';
 import '../../data/models/severity.dart';
+import 'severity_indicator.dart';
 import '../labels.dart';
 
 /// L'état des filtres de la carte (§4.1 F1).
@@ -110,8 +111,9 @@ class _MapFiltersSheetState extends State<MapFiltersSheet> {
                 ),
                 for (final severity in Severity.values)
                   ChoiceChip(
-                    avatar: Icon(severity.icon, size: 18, color: severity.color),
+                    avatar: SeverityIndicator(severity, height: 14),
                     label: Text(severity.label),
+                    tooltip: SeverityLabels.levelOutOf(severity.value),
                     selected: _filters.minSeverity == severity,
                     onSelected: (_) =>
                         setState(() => _filters = _filters.copyWith(minSeverity: severity)),

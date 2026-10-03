@@ -76,14 +76,14 @@ enchaîne les deux avant de construire, et refuse de publier un APK signé en de
 |---|---|
 | `hazard_model_test.dart` | Décodage RPC et GeoJSON, précision intacte, statut inconnu sans casse |
 | `api_client_test.dart` | Anti-doublon, position omise quand elle manque, messages du serveur |
-| `report_sheet_test.dart` | Sélecteur de type masqué à un seul type, gravité obligatoire, 140 caractères |
+| `report_sheet_test.dart` | Sélecteur de type masqué à un seul type, niveau obligatoire, 140 caractères |
 | `hazard_detail_sheet_test.dart` | Verbe de résolution issu du catalogue, bandeaux d'état, pas d'identifiant de terminal |
-| `map_filters_test.dart` | Filtres de type et de gravité |
+| `map_filters_test.dart` | Filtres de type et de niveau |
 | `marker_icons_test.dart` | Source GeoJSON minimale, noms d'images cohérents avec le style |
 
 Ce que les tests ne couvrent pas : l'écran de carte lui-même (`MapScreen`), qui a besoin
 d'une vraie surface MapLibre. Vérifié à la main sur émulateur — fond de carte, marqueurs aux
-trois gravités, clustering avec compteur au dézoom, tap, cycle complet créer / doublon /
+trois niveaux, clustering avec compteur au dézoom, tap, cycle complet créer / doublon /
 confirmer / résoudre.
 
 ## Organisation

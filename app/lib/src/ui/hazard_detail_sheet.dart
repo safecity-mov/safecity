@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/models/hazard.dart';
 import '../data/models/hazard_type.dart';
 import 'labels.dart';
+import 'widgets/severity_indicator.dart';
 import 'theme.dart';
 import 'widgets/weight_balance.dart';
 
@@ -73,9 +74,7 @@ class HazardDetailSheet extends StatelessWidget {
                       const SizedBox(height: 2),
                       Row(
                         children: [
-                          Icon(hazard.severity.icon, size: 15, color: hazard.severity.color),
-                          const SizedBox(width: 4),
-                          Text(hazard.severity.label, style: theme.textTheme.bodyMedium),
+                          SeverityIndicator(hazard.severity, height: 14, withLabel: true),
                           // « Signalé à distance » tenait une bande entière pour
                           // une nuance qui n'engage aucun geste. L'icône suffit
                           // à la signaler ; la phrase vient au doigt, pour qui

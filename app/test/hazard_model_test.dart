@@ -59,19 +59,18 @@ void main() {
       expect(Severity.fromValue(9), Severity.dangerous);
     });
 
-    test('donne un diamètre croissant : la gravité est lisible sans la couleur', () {
-      // §9, accessibilité : le type et la gravité doivent rester lisibles pour
+    test('donne un diamètre croissant : le niveau est lisible sans la couleur', () {
+      // §9, accessibilité : le type et le niveau doivent rester lisibles pour
       // quelqu'un qui ne distingue pas les couleurs.
       expect(Severity.annoying.markerRadius, lessThan(Severity.dangerous.markerRadius));
       expect(Severity.dangerous.markerRadius, lessThan(Severity.veryDangerous.markerRadius));
     });
 
-    test('donne à chaque niveau un libellé et une icône distincts', () {
-      final labels = Severity.values.map((s) => s.label).toSet();
-      final icons = Severity.values.map((s) => s.icon).toSet();
-
-      expect(labels, hasLength(3));
-      expect(icons, hasLength(3));
+    test('affiche chaque niveau par son chiffre, de 1 à 3', () {
+      // Un simple indicateur, sans libellé (§4.1 amendé) : le chiffre est la
+      // valeur envoyée au serveur, telle quelle.
+      expect(Severity.values.map((s) => s.label), ['1', '2', '3']);
+      expect(Severity.max, 3);
     });
   });
 

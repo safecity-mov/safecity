@@ -11,7 +11,7 @@ import '../data/models/severity.dart';
 ///
 /// Un marqueur porte **deux** informations redondantes avec la couleur, parce que
 /// la couleur seule ne suffit pas (§9) : l'icône donne le type, le diamètre donne
-/// la gravité. Un danger contesté est en outre creux plutôt que plein.
+/// le niveau. Un danger contesté est en outre creux plutôt que plein.
 class MarkerIcons {
   const MarkerIcons._();
 
@@ -24,7 +24,7 @@ class MarkerIcons {
   }) =>
       '$typeCode-${severity.value}-${disputed ? 'disputed' : 'active'}';
 
-  /// Toutes les combinaisons utiles : un type activé, trois gravités, deux états.
+  /// Toutes les combinaisons utiles : un type activé, trois niveaux, deux états.
   static Future<Map<String, Uint8List>> buildAll(
     List<HazardType> types, {
     double devicePixelRatio = 3,

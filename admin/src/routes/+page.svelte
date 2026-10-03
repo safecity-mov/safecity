@@ -29,7 +29,7 @@
 	<table>
 		<thead>
 			<tr>
-				<th>Type</th><th>Position</th><th>Gravité</th><th>Statut</th>
+				<th>Type</th><th>Position</th><th>Niveau</th><th>Statut</th>
 				<th>Poids « présent »</th><th>Créé</th><th>Action</th>
 			</tr>
 		</thead>

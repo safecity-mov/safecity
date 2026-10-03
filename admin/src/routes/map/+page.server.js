@@ -13,7 +13,7 @@ const LIMIT = 2000;
 
 /**
  * Avec les dangers, le catalogue et ses silhouettes : la carte dessine les mêmes marqueurs
- * que l'app — icône du type, diamètre selon la gravité, creux quand le danger est contesté —
+ * que l'app — icône du type, diamètre selon le niveau, creux quand le danger est contesté —
  * à ceci près que la couleur dit ici le statut, ce qui est ce qu'un modérateur regarde.
  * @type {import('./$types').PageServerLoad}
  */

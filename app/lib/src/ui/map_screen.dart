@@ -293,7 +293,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   // --- Carte ---------------------------------------------------------------
 
   /// Les marqueurs sont dessinés ici, pas livrés en assets : un fichier PNG par
-  /// type et par gravité serait à regénérer à chaque ajout de type. Rappelé
+  /// type et par niveau serait à regénérer à chaque ajout de type. Rappelé
   /// quand le catalogue change : `addImage` remplace une image du même nom.
   Future<void> _registerIcons(MapLibreMapController controller) async {
     final ratio = MediaQuery.devicePixelRatioOf(context);
@@ -568,7 +568,7 @@ class _MapScreenState extends State<MapScreen> with WidgetsBindingObserver {
   /// d'obliger à viser le bouton puis à recadrer.
   ///
   /// Aucun risque de signalement involontaire : ce geste ouvre le mode placement,
-  /// il ne crée rien. Il reste la feuille de gravité et « Envoyer » derrière.
+  /// il ne crée rien. Il reste la feuille de niveau et « Envoyer » derrière.
   /// Le plugin n'appelle pas ce callback quand le tap touche un marqueur, donc
   /// ouvrir un détail et poser un pin ne se marchent pas dessus.
   Future<void> _onMapClick(Point<double> point, LatLng coordinates) async {

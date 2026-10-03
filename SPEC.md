@@ -100,12 +100,12 @@ l'écran de signalement se réduit à gravité + photo + texte.
 
 | ID | Fonction | Détail |
 |---|---|---|
-| F1 | Carte | Position, fond OSM vectoriel, marqueur = icône du type + couleur de gravité, clustering au dézoom, détail en bottom sheet. Filtre par type et gravité. |
-| F2 | Signaler | Bouton central → pin posé à ma position, ajustable. Sélecteur de type (masqué si un seul type activé). Gravité sur 3 niveaux. Photo optionnelle. Commentaire optionnel (140 caractères). |
+| F1 | Carte | Position, fond OSM vectoriel, marqueur = icône du type + couleur de niveau, clustering au dézoom, détail en bottom sheet. Filtre par type et niveau. |
+| F2 | Signaler | Bouton central → pin posé à ma position, ajustable. Sélecteur de type (masqué si un seul type activé). Niveau sur 3 crans, 1, 2 ou 3, sans libellé (amendement : les mots « gênant », « dangereux », « très dangereux » ne voulaient pas dire la même chose pour tout le monde). Photo optionnelle. Commentaire optionnel (140 caractères). |
 | F2b | Anti-doublon | Si un danger actif **du même type** existe à moins de 15 m : « Est-ce celui-ci ? » → Confirmer plutôt que créer. |
 | F3 | Confirmer | « Toujours là ». Met à jour `last_confirmed_at` et pèse dans le poids « présent » du danger, selon la proximité (§6.1, §6.2 amendés). |
 | F4 | Marquer résolu | La « suppression » collaborative. Le bouton dit **« Plus là »**, le pendant exact de « Toujours là » (amendement ; il portait le verbe du type). Règles en §6. |
-| F5 | Détail | Type, gravité, date, nom de la voie (lu dans le fond de carte, §7), historique — c'est lui qui montre les confirmations, geste par geste. Photos abandonnées pour la bêta (§4.6). |
+| F5 | Détail | Type, niveau, date, nom de la voie (lu dans le fond de carte, §7), historique — c'est lui qui montre les confirmations, geste par geste. Photos abandonnées pour la bêta (§4.6). |
 | F6 | Hors-ligne | File d'attente locale des actions, cache des dangers et des tuiles consultées, synchronisation à la reconnexion. |
 | F7 | Signaler un abus | Flag avec motif. |
 | F8 | Paramètres | À propos, licences, attribution OpenStreetMap, effacer mes données, régénérer mon identifiant. **Sans export** (amendement) : voir §11.4. |
@@ -703,12 +703,12 @@ calculer `proximity` et ne le persistent nulle part (§11).
 ## 9. Écrans et UX
 
 1. **Carte** (écran principal, unique onglet). Centre par défaut : Paris, zoom 13, puis position
-   de l'utilisateur. FAB central « + », recentrer, filtres type et gravité (le calque « résolus
-   récemment » est retiré, §6.1). Marqueur : icône du type **et** couleur de gravité (jamais la couleur seule).
+   de l'utilisateur. FAB central « + », recentrer, filtres type et niveau (le calque « résolus
+   récemment » est retiré, §6.1). Marqueur : icône du type **et** couleur de niveau (jamais la couleur seule).
 2. **Nouveau signalement** (bottom sheet). Mini-carte avec pin ajustable, sélecteur de type
-   (rangée d'icônes, masquée si un seul type activé), 3 boutons de gravité (« Gênant »,
-   « Dangereux », « Très dangereux »), photo, texte, « Envoyer ». Objectif : moins de 10 secondes.
-3. **Détail** (bottom sheet). Photo, type, gravité, « signalé il y a 3 j », adresse, la
+   (rangée d'icônes, masquée si un seul type activé), 3 boutons de niveau, « 1 », « 2 »,
+   « 3 », chacun avec sa jauge (amendement : plus de libellés), photo, texte, « Envoyer ». Objectif : moins de 10 secondes.
+3. **Détail** (bottom sheet). Photo, type, niveau, « signalé il y a 3 j », adresse, la
    chronologie des gestes et la **balance** : une barre à deux moitiés, poids « toujours là »
    contre poids « plus là » à la même échelle, avec le repère du seuil qui tranche. Deux gros
    boutons : « Toujours là » / « Plus là ». Menu « … » : signaler un abus, partager, ajouter
@@ -718,7 +718,7 @@ calculer `proximity` et ne le persistent nulle part (§11).
 5. **Paramètres.** À propos, licences, exporter mes signalements, effacer mes données,
    régénérer mon identifiant.
 
-Accessibilité : contraste AA, cibles ≥ 44 pt, libellés VoiceOver / TalkBack, type et gravité
+Accessibilité : contraste AA, cibles ≥ 44 pt, libellés VoiceOver / TalkBack, type et niveau
 lisibles sans la couleur.
 
 ---

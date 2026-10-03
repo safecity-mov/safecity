@@ -48,7 +48,7 @@
 	Le seuil monte avec le <strong>poids</strong> des gestes « présent » — le signalement, puis
 	chaque « toujours là » — pour qu'un trou vu par tout le quartier ne disparaisse pas sur deux
 	clics. Un signalement vaut à lui seul plusieurs confirmations : c'est le geste lourd, celui
-	qui place le pin et choisit la gravité. Et chaque geste, « présent » comme « résolu », pèse
+	qui place le pin et choisit le niveau. Et chaque geste, « présent » comme « résolu », pèse
 	selon la distance : sur place 1, ailleurs ou sans position un tiers. Il faut donc trois
 	personnes à distance pour valoir une sur place, dans un sens comme dans l'autre.
 </p>

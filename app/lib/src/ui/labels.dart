@@ -19,6 +19,8 @@
 ///    condition d'affichage. Ce fichier ne dit que ce qui est écrit.
 library;
 
+import '../data/models/severity.dart';
+
 /// Le nom de l'application, tel qu'il s'écrit partout dans l'app.
 ///
 /// Le même mot figure une seconde fois, hors de Dart, dans
@@ -72,7 +74,7 @@ abstract final class StartupLabels {
 abstract final class ReportLabels {
   static const title = 'Signaler un danger';
   static const typeSection = 'Type';
-  static const severitySection = 'Gravité';
+  static const severitySection = 'Niveau';
   static const descriptionLabel = 'Précision (facultatif)';
 
   /// Prévient que le champ est public (§11.2).
@@ -80,8 +82,8 @@ abstract final class ReportLabels {
 
   static const send = 'Envoyer';
 
-  /// Lu par les lecteurs d'écran sur chaque case de gravité.
-  static String severityOption(String severity) => 'Gravité : $severity';
+  /// Lu par les lecteurs d'écran sur chaque case de niveau.
+  static String severityOption(int level) => SeverityLabels.levelOutOf(level);
 }
 
 /// Feuille de détail d'un danger (§4.1 F5).
@@ -143,23 +145,24 @@ abstract final class DetailLabels {
   static const close = 'Fermer';
 }
 
-/// Les trois niveaux de gravité (§4.1). Portés par l'énumération `Severity`,
-/// qui les lit ici : la couleur et l'icône sont à elle, le mot est à ce fichier.
+/// Le niveau d'un danger (§4.1, amendé) : un chiffre de 1 à 3, sans libellé.
+/// L'énumération `Severity` garde la couleur et la taille ; les mots sont ici.
 abstract final class SeverityLabels {
-  static const annoying = 'Gênant';
-  static const dangerous = 'Dangereux';
-  static const veryDangerous = 'Très dangereux';
+  static String level(int level) => 'Niveau $level';
+
+  /// Pour les lecteurs d'écran, qui ne voient pas la jauge.
+  static String levelOutOf(int level) => 'Niveau $level sur ${Severity.max}';
 }
 
 /// Filtres de la carte (§4.1 F2).
 abstract final class FiltersLabels {
   static const title = 'Filtres';
   static const typesSection = 'Types de danger';
-  static const severitySection = 'Gravité minimale';
+  static const severitySection = 'Niveau minimal';
   static const apply = 'Appliquer';
 
-  /// Le cran « aucune gravité minimale ».
-  static const allSeverities = 'Toutes';
+  /// Le cran « aucun niveau minimal ».
+  static const allSeverities = 'Tous';
 }
 
 /// Cartes hors-ligne (§10).

@@ -57,7 +57,7 @@ demandé**, jamais l'adresse : nous savons que la limite a servi, pas à qui.
 
 ## Ce que nous enregistrons, et pourquoi c'est le minimum
 
-Un signalement, c'est un fait sur la voirie : un nid-de-poule à tel endroit, de telle gravité, à
+Un signalement, c'est un fait sur la voirie : un nid-de-poule à tel endroit, de tel niveau, à
 telle heure. **L'endroit et l'heure sont conservés au mètre et à la seconde près**, sans arrondi.
 Un trou localisé « à cinquante mètres près » ne sert à personne, et dégrader cette précision
 serait une fausse protection de la vie privée : elle abîmerait le produit sans rien vous
@@ -67,7 +67,7 @@ Ce qui vous concerne, c'est le **lien** entre ces faits. C'est lui que nous born
 
 | Ce qui est enregistré | Pourquoi | Pendant combien de temps |
 |---|---|---|
-| L'endroit du danger, sa gravité, son type | C'est le service | Vie du signalement |
+| L'endroit du danger, son niveau, son type | C'est le service | Vie du signalement |
 | L'heure de chaque geste | Ancienneté, ordre des événements | Vie du signalement |
 | « sur place / ailleurs » | Un geste fait sur place pèse plus qu'un geste fait de loin | Vie du geste |
 | Votre numéro, attaché à vos gestes | Anti-double-vote, retrait sous 24 h | **24 heures** |
