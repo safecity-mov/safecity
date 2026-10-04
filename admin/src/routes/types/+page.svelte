@@ -127,6 +127,10 @@
 			<label>Rayon anti-doublon (m)
 				<input type="number" name="dedup_radius_m" value={t.dedup_radius_m} min="1" max="500" required />
 			</label>
+			<label>Ordre
+				<input type="number" name="sort_order" value={t.sort_order} min="0" max="9999" required />
+				<small>dans l'app, les plus petits d'abord ; l'ordre de cette page est le même</small>
+			</label>
 			<button type="submit">Enregistrer</button>
 		</div>
 	</form>
@@ -210,5 +214,6 @@
 	.bascule { font-size: 0.85rem; display: flex; gap: 0.35rem; align-items: center; }
 	.champs { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; }
 	.champs label { display: flex; flex-direction: column; font-size: 0.75rem; color: #5a6470; gap: 0.25rem; }
+	.champs small { font-size: 0.7rem; color: #8a8f97; max-width: 14rem; }
 	h2 { font-size: 1.1rem; margin-top: 2rem; }
 </style>

@@ -68,6 +68,8 @@ export const actions = {
 				icon: text(form.get('icon')) || code,
 				default_ttl_days: requireInteger(form.get('default_ttl_days'), 'Expire après', 1, 3650),
 				dedup_radius_m: requireInteger(form.get('dedup_radius_m'), 'Rayon anti-doublon', 1, 500),
+				// L'ordre d'apparition dans l'app, les plus petits en premier (hazard_types.sort_order).
+				sort_order: requireInteger(form.get('sort_order'), 'Ordre', 0, 9999),
 				enabled: form.get('enabled') === 'on'
 			};
 			if (!patch.label_fr || !patch.resolved_label_fr) {
