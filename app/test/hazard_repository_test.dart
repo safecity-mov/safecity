@@ -38,6 +38,39 @@ void main() {
   });
 
   group('en ligne', () {
+    test('déclare son terminal une fois, puis se tait', () async {
+      FlutterSecureStorage.setMockInitialValues({});
+      // §6.3 amendé (0250) : le quart d'heure avant « Plus là » part de
+      // l'ouverture de l'app. Une fois par identifiant, pas à chaque lancement.
+      await repo.declareDevice();
+      await repo.declareDevice();
+      expect(server.declared, 1);
+      expect(server.writes, 0, reason: 'déclarer n\'est pas un geste');
+    });
+
+    test('un identifiant neuf se déclare à nouveau', () async {
+      FlutterSecureStorage.setMockInitialValues({});
+      final device = DeviceIdentity();
+      repo = HazardRepository(
+        api: ApiClient(httpClient: server, baseUrl: 'http://test/rest/v1'),
+        db: db,
+        device: device,
+      );
+      await repo.declareDevice();
+      await device.regenerate();
+      await repo.declareDevice();
+      expect(server.declared, 2);
+    });
+
+    test('une déclaration qui échoue ne gêne personne et sera retentée', () async {
+      FlutterSecureStorage.setMockInitialValues({});
+      server.offline = true;
+      await repo.declareDevice();
+      server.offline = false;
+      await repo.declareDevice();
+      expect(server.declared, 1);
+    });
+
     test('déclare le palier calculé sur l\'appareil, jamais une position', () async {
       // Le serveur ne reçoit plus de coordonnée du déclarant : le palier est calculé ici
       // (§11.1). Ce test garde la promesse vérifiable sans lire le code du RPC.
@@ -583,6 +616,8 @@ class _FakeServer extends http.BaseClient {
   int calls = 0;
   /// Appels aux RPC d'écriture, pour compter ce qui part vraiment.
   int writes = 0;
+  /// Déclarations de terminal reçues (0250).
+  int declared = 0;
   String createdId = 'créé-par-le-serveur';
 
   @override
@@ -642,6 +677,10 @@ class _FakeServer extends http.BaseClient {
       final regle = tiers;
       if (regle == null) return _json({'message': 'indisponible'}, 500);
       return _json(regle);
+    }
+    if (path.endsWith('declare_device')) {
+      declared++;
+      return _json({'since': '2026-10-04T10:00:00Z'});
     }
     if (path.endsWith('report_hazard')) {
       writes++;

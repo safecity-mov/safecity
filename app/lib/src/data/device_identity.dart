@@ -17,6 +17,7 @@ class DeviceIdentity {
         _uuid = uuid ?? const Uuid();
 
   static const _key = 'device_id';
+  static const _declaredKey = 'device_declared';
 
   final FlutterSecureStorage _storage;
   final Uuid _uuid;
@@ -49,6 +50,16 @@ class DeviceIdentity {
     _cached = fresh;
     return fresh;
   }
+
+  /// L'identifiant a-t-il déjà été déclaré au serveur (§6.3 amendé, 0250) ?
+  ///
+  /// Le quart d'heure de carence avant « Plus là » court depuis que le serveur
+  /// connaît le terminal. L'app le lui dit une fois par identifiant, à son
+  /// premier lancement ; ce drapeau retient lequel, pour ne pas le redire à
+  /// chaque ouverture. Un identifiant neuf (`regenerate`) n'y correspond plus.
+  Future<bool> isDeclared(String id) async => await _storage.read(key: _declaredKey) == id;
+
+  Future<void> markDeclared(String id) => _storage.write(key: _declaredKey, value: id);
 
   /// Identifiant d'une action, distinct du terminal.
   ///

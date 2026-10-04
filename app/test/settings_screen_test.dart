@@ -89,6 +89,9 @@ void main() {
       // reçu l'ancien numéro, et le téléphone n'a plus le même.
       expect(server.forgotten, [before]);
       expect(await device.id, isNot(before));
+      // Et le numéro neuf est déclaré aussitôt : son quart d'heure avant
+      // « Plus là » part d'ici (0250).
+      expect(server.declared, [await device.id]);
       expect(find.text(SettingsLabels.detached(3)), findsOneWidget);
     });
 
@@ -155,6 +158,8 @@ void main() {
 class _Server extends http.BaseClient {
   final forgotten = <String>[];
   final removedFor = <String>[];
+  /// Identifiants déclarés au serveur (0250) : le neuf, après « Effacer mes données ».
+  final declared = <String>[];
   bool offline = false;
 
   /// Ce que le serveur répond à « retirer mes signalements récents ».
@@ -165,6 +170,10 @@ class _Server extends http.BaseClient {
     if (offline) throw const SocketExceptionStub();
     final body = jsonDecode(await (request as http.Request).finalize().bytesToString())
         as Map<String, dynamic>;
+    if (request.url.path.endsWith('declare_device')) {
+      declared.add(body['device_id'] as String);
+      return http.StreamedResponse(Stream.value(utf8.encode('{"since":"2026-10-04T10:00:00Z"}')), 200);
+    }
     if (request.url.path.endsWith('remove_own_recent_hazards')) {
       removedFor.add(body['device_id'] as String);
       return http.StreamedResponse(Stream.value(utf8.encode('{"removed":$removed}')), 200);

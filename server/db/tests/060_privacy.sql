@@ -140,10 +140,10 @@ SELECT ok(NOT has_table_privilege('anon', 'announcements', 'SELECT'),
 -- `st_x` et `st_y` : les seules fonctions PostGIS accordées, parce que `hazards_public` les
 -- appelle et qu'une vue exécute ses fonctions avec les droits du lecteur.
 SELECT is(app_test.callable_by('anon'),
-          ARRAY['confirm_hazard', 'forget_device', 'hazard_detail', 'hazards_in_bbox',
+          ARRAY['confirm_hazard', 'declare_device', 'forget_device', 'hazard_detail', 'hazards_in_bbox',
                 'mark_resolved', 'remove_own_hazard', 'remove_own_recent_hazards', 'report_hazard',
                 'st_x', 'st_y'],
-          'anon ne peut appeler que les huit RPC du §8 et deux accesseurs de coordonnées');
+          'anon ne peut appeler que les neuf RPC du §8 et deux accesseurs de coordonnées');
 SELECT is(app_test.callable_by('admin_api'),
           ARRAY['admin_ban_device', 'admin_ban_hazard_author', 'admin_clear_hazard_description',
                 'admin_clear_hazard_icon', 'admin_publish_announcement',

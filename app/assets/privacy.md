@@ -10,7 +10,7 @@
 
 **Le lien entre votre identifiant temporaire et vos signalements est coupé au bout de 24 heures.** Avant, vous pouvez les retirer. Après, plus personne ne sait qu'ils sont les vôtres, vous compris.
 
-**Un seul serveur, le nôtre.** Aucune mesure d'audience, aucun traceur, aucun service tiers, pas même pour le fond de carte. Aucun journal de connexion. À chaque ouverture et retour au premier plan, l'application lui demande s'il existe une version plus récente et relit la liste des types de danger, sans rien envoyer.
+**Un seul serveur, le nôtre.** Aucune mesure d'audience, aucun traceur, aucun service tiers, pas même pour le fond de carte. Aucun journal de connexion. À chaque ouverture et retour au premier plan, l'application lui demande s'il existe une version plus récente et relit la liste des types de danger, sans rien envoyer. Seule exception : à la toute première ouverture, elle déclare son identifiant au serveur, une fois, pour que le délai d'un quart d'heure avant de pouvoir dire « plus là » coure dès l'ouverture.
 
 **Vos commentaires sont publics et définitifs.** C'est la seule chose ici dont vous devez vous méfier.
 

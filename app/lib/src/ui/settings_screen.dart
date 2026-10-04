@@ -221,6 +221,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         await widget.repo.clearLocalData();
         await widget.repo.measurements.clear();
         widget.location.forget();
+        // L'identifiant neuf se déclare tout de suite : son quart d'heure
+        // part d'ici, pas de son premier geste (0250).
+        unawaited(widget.repo.declareDevice());
       }
       if (!mounted) return;
       _say(switch ((refusal, detached)) {

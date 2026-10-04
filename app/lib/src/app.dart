@@ -95,6 +95,10 @@ class _BootstrapState extends State<_Bootstrap> {
       // sans catalogue il n'y a pas d'écran à dessiner, pas même hors ligne (§3).
       final types = await _repo.types();
       final onboarded = await _storage.read(key: _onboardingKey) == 'true';
+      // Le serveur apprend que ce terminal existe dès maintenant : le quart
+      // d'heure avant « Plus là » (§6.3) court depuis l'ouverture, pas depuis
+      // le premier geste. Sans attendre la réponse, l'écran n'en dépend pas.
+      unawaited(_repo.declareDevice());
 
       if (!mounted) return;
       setState(() {

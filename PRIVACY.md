@@ -33,6 +33,12 @@ appareil, et il ne suit rien en dehors de l'application. Il sert à deux choses 
 voter deux fois sur le même danger, et vous laisser retirer votre propre signalement dans les
 24 heures.
 
+À la toute première ouverture, l'application dit ce numéro au serveur, une fois. Le serveur n'en
+retient que la date : c'est à partir d'elle que court le quart d'heure pendant lequel un téléphone
+tout neuf ne peut pas encore marquer un danger « plus là », une protection contre qui
+réinstallerait l'application pour voter plusieurs fois. Sans cette déclaration, ce délai partait
+de votre premier geste, et vous pouviez l'attendre deux fois.
+
 Vous pouvez en changer à tout moment, dans les paramètres. Cela coupe le lien avec tout ce que
 vous avez fait avant, immédiatement, sans rien demander à personne. Désinstaller l'application
 le détruit aussi : il n'est sauvegardé nulle part, pas même sur votre compte Google.
@@ -71,6 +77,7 @@ Ce qui vous concerne, c'est le **lien** entre ces faits. C'est lui que nous born
 | L'heure de chaque geste | Ancienneté, ordre des événements | Vie du signalement |
 | « sur place / ailleurs » | Un geste fait sur place pèse plus qu'un geste fait de loin | Vie du geste |
 | Votre numéro, attaché à vos gestes | Anti-double-vote, retrait sous 24 h | **24 heures** |
+| Votre numéro et la date de sa première ouverture | Le quart d'heure avant de pouvoir dire « plus là » | Jusqu'à « Effacer mes données » |
 | Votre commentaire, si vous en écrivez un | Préciser le danger | Vie du signalement |
 
 Au bout de 24 heures, votre numéro est retiré de tout : de vos gestes, et de vos signalements.
@@ -177,7 +184,9 @@ prévenir si la vôtre est en retard, relit le catalogue des types de danger, et
 l'équipe a une **annonce** à faire — une ligne, la même pour tout le monde, écrite depuis la
 console d'administration, par exemple pour vous prévenir d'une panne. Ces demandes ne
 contiennent rien : ni votre numéro, ni la version que vous utilisez, ni quoi que ce soit
-d'autre — c'est la même requête pour tout le monde, et le serveur n'en garde pas trace. Si une
+d'autre — c'est la même requête pour tout le monde, et le serveur n'en garde pas trace. La seule
+exception est la toute première ouverture, où l'application déclare son numéro, une fois (voir
+plus haut). Si une
 version plus récente existe, un bandeau vous le dit ; c'est vous qui décidez de la télécharger.
 Une annonce s'affiche de la même façon, et se ferme d'un toucher ; l'application retient
 seulement, sur votre téléphone, le numéro de la dernière annonce que vous avez fermée, pour
@@ -203,6 +212,7 @@ discrètement.
 | Affirmation | Où |
 |---|---|
 | Un numéro au hasard, en stockage chiffré | `app/lib/src/data/device_identity.dart` |
+| Le numéro est déclaré une fois, à la première ouverture, et le serveur n'en garde que la date | `app/lib/src/data/hazard_repository.dart` (`declareDevice`), `server/db/migrations/0250_declare_device.sql` |
 | La position devient deux valeurs sur votre appareil | `app/lib/src/data/proximity.dart` |
 | Le serveur n'a plus de quoi recevoir une coordonnée | `server/db/migrations/0100_local_proximity.sql` |
 | Aucune colonne ne peut recevoir votre position | `server/db/migrations/0010_enums_tables.sql` |

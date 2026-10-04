@@ -818,6 +818,21 @@ class HazardRepository {
   /// se recharge au retour des Paramètres, et le serveur dit ce qui reste.
   Future<int> removeOwnRecent() async => _api.removeOwnRecentHazards(await _device.id);
 
+  /// Déclare le terminal au serveur, une fois par identifiant (§6.3 amendé,
+  /// 0250) : le quart d'heure avant « Plus là » part de l'ouverture de l'app,
+  /// pas du premier geste. Silencieux en cas d'échec : la prochaine ouverture
+  /// réessaiera, et au pire le compteur partira du premier geste, comme avant.
+  Future<void> declareDevice() async {
+    final id = await _device.id;
+    if (await _device.isDeclared(id)) return;
+    try {
+      await _api.declareDevice(id);
+      await _device.markDeclared(id);
+    } on Object {
+      // Rien à montrer : ce n'est pas un geste de la personne.
+    }
+  }
+
   Future<int> forgetOnServer() async {
     final detached = await _api.forgetDevice(await _device.id);
     await clearLocalData();

@@ -293,6 +293,15 @@ class ApiClient {
     return ((result as Map<String, dynamic>)['removed'] as num?)?.toInt() ?? 0;
   }
 
+  /// Déclare le terminal au serveur (§6.3 amendé, 0250) : le quart d'heure de
+  /// carence avant « Plus là » court à partir de là. Rend depuis quand le
+  /// serveur connaît l'identifiant.
+  Future<DateTime?> declareDevice(String deviceId) async {
+    final result = await _rpc('declare_device', {'device_id': deviceId});
+    final since = (result as Map<String, dynamic>)['since'] as String?;
+    return since == null ? null : DateTime.tryParse(since);
+  }
+
   Future<int> forgetDevice(String deviceId) async {
     final result = await _rpc('forget_device', {'device_id': deviceId});
     final map = result as Map<String, dynamic>;

@@ -564,6 +564,9 @@ du terminal dès l'envoi.
   de quinze minutes ne peut pas dire « résolu » : réinstaller l'app donne un identifiant neuf
   sans passer par le serveur, on ne l'empêche pas, on le rend lent, un quart d'heure par voix.
   Le refus dit le temps restant. Créer et confirmer restent libres dès le premier geste.
+  **Amendement (0250)** : le compteur part de la première ouverture de l'app, qui déclare son
+  identifiant au serveur une fois (`declare_device`), et non plus du premier geste — sinon qui
+  regardait la carte vingt minutes avant de voter attendait deux fois.
 - **Flags** : 3 flags → masqué en attente de revue, puis traité dans la file de modération de
   la console d'administration (§4.3).
 - **Rejeu** : le journal permet de corriger a posteriori un vandalisme découvert tard.
